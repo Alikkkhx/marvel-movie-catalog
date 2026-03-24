@@ -2,16 +2,13 @@
 FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw.cmd .
 COPY src src
 
-RUN apk add --no-cache bash && \
-    chmod +x mvnw.cmd
+# Install Maven directly (no wrapper needed)
+RUN apk add --no-cache maven
 
-# Use Maven wrapper to build (skip tests)
-RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw.cmd -B package -DskipTests
+# Build the jar (skip tests)
+RUN mvn -B package -DskipTests
 
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
